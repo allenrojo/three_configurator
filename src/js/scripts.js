@@ -23,7 +23,7 @@ const camera = new THREE.PerspectiveCamera(
 const orbit = new OrbitControls(camera, renderer.domElement);
 
 const axesHelper = new THREE.AxesHelper(5);
-//scene.add(axesHelper);
+scene.add(axesHelper);
 const gridHelper = new THREE.GridHelper(30, 30);
 //scene.add(gridHelper);
 
@@ -37,9 +37,9 @@ assetLoader.load(controllerUrl.href, function(gltf) {
     model.traverse((child) => {
         if (child.isMesh) {
             child.material = new THREE.MeshStandardMaterial({
-                color: 0xffffff,   // default white
-                metalness: 0.2,    // how metallic the surface looks
-                roughness: 0.7     // higher = more matte, lower = shiny
+                color: 0x1C1C1C,   
+                metalness: 0.3,    
+                roughness: 0.5     
             });
             child.castShadow = true;
             child.receiveShadow = true;
@@ -50,34 +50,21 @@ assetLoader.load(controllerUrl.href, function(gltf) {
     console.error(error);
 } )
 
-/*const directionalLight = new THREE.DirectionalLight(0xFFFFFF,0.8);
-directionalLight.castShadow = true;
-directionalLight.position.set(5,10,5);
-directionalLight.shadow.mapSize.width = 2048;
-directionalLight.shadow.mapSize.height = 2048;
-directionalLight.shadow.camera.near = 0.5;
-directionalLight.shadow.camera.far = 50;
-scene.add(directionalLight);*/
-
-// Key light (main directional from above/front)
 const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);
-keyLight.position.set(5, 10, 7.5);
+keyLight.position.set(5, 10, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.radius = 4;
 scene.add(keyLight);
 
-// Fill light (opposite side, softer, no shadows)
 const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
 fillLight.position.set(-5, 5, -5);
 scene.add(fillLight);
 
-// Rim light (behind to give outline)
 const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
 rimLight.position.set(0, 8, -10);
 scene.add(rimLight);
 
-// Under-light (to brighten sole, no shadows)
 const underLight = new THREE.DirectionalLight(0xffffff, 0.3);
 underLight.position.set(0, -5, 0);
 scene.add(underLight);
