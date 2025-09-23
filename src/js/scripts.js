@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+
 const controllerUrl = new URL('../assets/controller.glb',import.meta.url);
 
 const renderer = new THREE.WebGLRenderer();
@@ -25,53 +26,82 @@ const orbit = new OrbitControls(camera, renderer.domElement);
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 const gridHelper = new THREE.GridHelper(30, 30);
-//scene.add(gridHelper);
+//scene.add(gridHelper)
 
+const meshMaterials = {}; 
+const meshCache = {};
 
 const assetLoader = new GLTFLoader();
 assetLoader.load(controllerUrl.href, function(gltf) {
+    const parts = {};
     const model = gltf.scene;
     scene.add(model);
-    model.position.set(0,1,0);
+    model.position.set(0,1.5,0);
+    model.rotateX(.5);
 
     model.traverse((child) => {
         if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({
-                color: 0x1C1C1C,   
-                metalness: 0.3,    
-                roughness: 0.5     
-            });
+            meshCache[child.name] = child;
+            meshMaterials[child.name] = child.material;
             child.castShadow = true;
             child.receiveShadow = true;
         }
+        if (child.isMesh) {
+        parts[child.name] = child;
+        }
+        console.log(parts);
+        if(meshCache["button_transparent"]) {
+            meshCache["button_transparent"].material = glassMaterial;
+            meshCache["button_transparent"].material.needsUpdate = true;
+        }
+
     });
     
 }, undefined, function(error) {
     console.error(error);
 } )
 
-const keyLight = new THREE.DirectionalLight(0xffffff, 0.5);
-keyLight.position.set(5, 10, 5);
-keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(2048, 2048);
-keyLight.shadow.radius = 4;
-scene.add(keyLight);
 
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+//soft area light
+const softLight = new THREE.RectAreaLight(0xffffff, 5, 6, 6);
+
+softLight.position.set(5, 8, 5);
+softLight.lookAt(0, 1, 0); 
+scene.add(softLight);
+
+const mainLight = new THREE.DirectionalLight(0xffffff, 0);
+mainLight.position.set(0, 8, 5);
+mainLight.castShadow = true;
+
+mainLight.shadow.mapSize.width = 4096;
+mainLight.shadow.mapSize.height = 4096;
+mainLight.shadow.camera.near = 0.5;
+mainLight.shadow.camera.far = 50;
+mainLight.shadow.camera.left = -10;
+mainLight.shadow.camera.right = 10;
+mainLight.shadow.camera.top = 10;
+mainLight.shadow.camera.bottom = -10;
+mainLight.shadow.radius = 10; // Soft shadow blur
+mainLight.shadow.blurSamples = 25; // Higher quality blur
+
+scene.add(mainLight);
+
+const fillLight = new THREE.DirectionalLight(0xffffff, .4);
 fillLight.position.set(-5, 5, -5);
 scene.add(fillLight);
 
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.3);
+const rimLight = new THREE.DirectionalLight(0xffffff, .5);
 rimLight.position.set(0, 8, -10);
 scene.add(rimLight);
 
-const underLight = new THREE.DirectionalLight(0xffffff, 0.3);
+const underLight = new THREE.DirectionalLight(0xffffff, .2);
 underLight.position.set(0, -5, 0);
 scene.add(underLight);
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+const ambient = new THREE.AmbientLight(0xffffff, .6);
 scene.add(ambient);
 
+//Real Shadow 
 const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3 }); // adjust opacity
 const shadowPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(200, 200),
@@ -81,6 +111,20 @@ shadowPlane.rotation.x = -Math.PI / 2;
 shadowPlane.position.y = 0;
 shadowPlane.receiveShadow = true;
 scene.add(shadowPlane);
+
+const glassMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0x4D4D4D,
+  metalness: 0,
+  roughness: 0,
+  transmission: 1,
+  thickness: 0.2,
+  transparent: true,
+  opacity: 1,
+  ior: 1,
+  clearcoat: 1,
+  clearcoatRoughness: 0,
+});
+
 
 camera.position.set(0,2,5);
 orbit.update();
