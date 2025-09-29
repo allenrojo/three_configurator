@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
+import { UIController } from './ui-controller.js';
 
 const controllerUrl = new URL('../assets/controller.glb',import.meta.url);
 
@@ -31,6 +31,9 @@ const gridHelper = new THREE.GridHelper(30, 30);
 const meshMaterials = {}; 
 const meshCache = {};
 
+// Add this variable to store the UI controller
+let uiController;
+
 const assetLoader = new GLTFLoader();
 assetLoader.load(controllerUrl.href, function(gltf) {
     const parts = {};
@@ -50,12 +53,14 @@ assetLoader.load(controllerUrl.href, function(gltf) {
         parts[child.name] = child;
         }
         console.log(parts);
-        if(meshCache["button_transparent"]) {
-            meshCache["button_transparent"].material = glassMaterial;
-            meshCache["button_transparent"].material.needsUpdate = true;
+        if(meshCache["button_outer"]) {
+            meshCache["button_outer"].material = glassMaterial;
+            meshCache["button_outer"].material.needsUpdate = true;
         }
 
     });
+
+    uiController = new UIController(meshCache, meshMaterials, scene);
     
 }, undefined, function(error) {
     console.error(error);
