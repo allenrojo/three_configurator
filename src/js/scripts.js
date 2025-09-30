@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+
 import { UIController } from './ui-controller.js';
 
 const controllerUrl = new URL('../assets/controller.glb',import.meta.url);
@@ -38,12 +38,7 @@ orbit.dampingFactor = 0.05;      // Smoothness amount
 orbit.minDistance = 2;           // How close you can zoom
 orbit.maxDistance = 10;   
 
-// HDR environment
-const rgbeLoader = new RGBELoader();
-rgbeLoader.load('../assets/studio_small.hdr', function(texture) {
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = texture;
-});
+
 
 const axesHelper = new THREE.AxesHelper(5);
 //scene.add(axesHelper);
