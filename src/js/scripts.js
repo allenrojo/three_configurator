@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
 import { UIController } from './ui-controller.js';
 
-const controllerUrl = new URL('../assets/controller.glb',import.meta.url);
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -38,8 +37,6 @@ orbit.dampingFactor = 0.05;      // Smoothness amount
 orbit.minDistance = 2;           // How close you can zoom
 orbit.maxDistance = 10;   
 
-
-
 const axesHelper = new THREE.AxesHelper(5);
 //scene.add(axesHelper);
 
@@ -57,7 +54,7 @@ const mouse = new THREE.Vector2();
 let uiController;
 
 const assetLoader = new GLTFLoader();
-assetLoader.load(controllerUrl.href, function(gltf) {
+assetLoader.load('/models/controller.glb', function(gltf) {
     const parts = {};
     const model = gltf.scene;
     scene.add(model);
