@@ -10,7 +10,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// Enable proper color management
+// color management
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
@@ -29,7 +29,16 @@ const camera = new THREE.PerspectiveCamera(
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 
-// Load HDR environment
+orbit.target.set(0, 1.5, 0);  // Slightly above the origin
+orbit.update();
+
+// You can also add these optional settings for better control:
+orbit.enableDamping = true;      // Smooth camera movement
+orbit.dampingFactor = 0.05;      // Smoothness amount
+orbit.minDistance = 2;           // How close you can zoom
+orbit.maxDistance = 10;   
+
+// HDR environment
 const rgbeLoader = new RGBELoader();
 rgbeLoader.load('../assets/studio_small.hdr', function(texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -37,7 +46,7 @@ rgbeLoader.load('../assets/studio_small.hdr', function(texture) {
 });
 
 const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+//scene.add(axesHelper);
 
 const gridHelper = new THREE.GridHelper(30, 30);
 //scene.add(gridHelper)
@@ -45,11 +54,11 @@ const gridHelper = new THREE.GridHelper(30, 30);
 const meshMaterials = {};
 const meshCache = {};
 
-// ✅ ADD: Raycaster for click detection
+// Raycaster for click detection
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// Add this variable to store the UI controller
+// store the UI controller
 let uiController;
 
 const assetLoader = new GLTFLoader();
@@ -64,26 +73,11 @@ assetLoader.load(controllerUrl.href, function(gltf) {
         if (child.isMesh) {
             meshCache[child.name] = child;
             
-            // ✅ FIX: Clone the material instead of storing reference
             meshMaterials[child.name] = child.material.clone();
             
             child.castShadow = true;
             child.receiveShadow = true;
-            
-            // Fix dark materials
-            if (child.material) {
-                child.material.envMapIntensity = 1.0;
-                
-                if (child.material.color && child.material.color.r < 0.1) {
-                    child.material.color.setHex(0x0E0E0E);
-                    
-                    if (child.material.metalness > 0.5) {
-                        child.material.roughness = Math.max(child.material.roughness, 0.3);
-                    }
-                }
-                
-                child.material.needsUpdate = true;
-            }
+        
         }
         
         if (child.isMesh) {
@@ -103,7 +97,7 @@ assetLoader.load(controllerUrl.href, function(gltf) {
     console.error(error);
 });
 
-//soft area light
+// soft area light
 const softLight = new THREE.RectAreaLight(0xffffff, 5, 6, 6);
 softLight.position.set(5, 8, 5);
 softLight.lookAt(0, 1, 0);
@@ -139,7 +133,7 @@ scene.add(underLight);
 const ambient = new THREE.AmbientLight(0xffffff, .6);
 scene.add(ambient);
 
-//Real Shadow
+// real shadow
 const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3 });
 const shadowPlane = new THREE.Mesh(
   new THREE.PlaneGeometry(200, 200),
@@ -166,7 +160,7 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
 camera.position.set(0,2,5);
 orbit.update();
 
-// ✅ ADD: Mouse click event listener
+// Mouse click event listener
 function onMouseClick(event) {
     // Calculate mouse position in normalized device coordinates (-1 to +1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -191,10 +185,10 @@ function onMouseClick(event) {
     }
 }
 
-// ✅ ADD: Attach click listener to the renderer
+// Attach click listener to the renderer
 renderer.domElement.addEventListener('click', onMouseClick, false);
 
-// ✅ ADD: Visual feedback on hover (optional but nice)
+// Visual feedback on hover (optional but nice)
 function onMouseMove(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;

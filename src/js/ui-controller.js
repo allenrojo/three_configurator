@@ -62,7 +62,7 @@ export class UIController {
             if (this.currentMesh && this.currentMesh.name === partName) {
                 this.currentMesh.material.color.copy(currentColor);
             }
-        }, 200); // 200ms flash duration
+        }, 500); // 200ms flash duration
         
         this.updatePartDisplay(partName, index);
         this.updateActiveColorFromMesh();
@@ -148,15 +148,7 @@ export class UIController {
     this.selectPartByIndex(this.currentPartIndex);
   }
 
-  selectPartByIndex(index) {
-    const partName = this.partNames[index];
-    this.currentMesh = this.meshCache[partName];
-    
-    if (this.currentMesh) {
-      this.updatePartDisplay(partName, index);
-      this.updateActiveColorFromMesh();
-    }
-  }
+
 
   updatePartDisplay(partName, index) {
     const displayName = partName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
