@@ -10,21 +10,9 @@ export class UIController {
     
     // Define color palette
     this.colors = [
-      { name: 'Black', hex: '#000000' },
+      { name: 'Black', hex: '#0E0E0E' },
       { name: 'Gray', hex: '#808080' },
       { name: 'White', hex: '#FFFFFF' },
-      { name: 'Cream', hex: '#F5F5DC' },
-      { name: 'Olive', hex: '#6B7C59' },
-      { name: 'Green', hex: '#2D5F4F' },
-      { name: 'Brown', hex: '#8B4513' },
-      { name: 'Gold', hex: '#DAA520' },
-      { name: 'Lavender', hex: '#B4A7D6' },
-      { name: 'Purple', hex: '#8B7B8B' },
-      { name: 'Maroon', hex: '#800020' },
-      { name: 'Blue', hex: '#4A90E2' },
-      { name: 'Navy', hex: '#1E3A8A' },
-      { name: 'Red', hex: '#DC143C' },
-      { name: 'Orange', hex: '#FF6B35' },
     ];
     
     this.init();
@@ -38,6 +26,48 @@ export class UIController {
     }
   }
 
+  selectPartByName(partName) {
+    const index = this.partNames.indexOf(partName);
+    
+    if (index !== -1) {
+      this.currentPartIndex = index;
+      this.selectPartByIndex(index);
+    } else {
+      console.warn(`Part "${partName}" not found in partNames array`);
+    }
+  }   
+
+  selectPartByIndex(index) {
+    const partName = this.partNames[index];
+    
+    // Remove highlight from previous mesh (restore original color)
+    if (this.currentMesh) {
+        const originalMaterial = this.meshMaterials[this.currentMesh.name];
+        if (originalMaterial) {
+            this.currentMesh.material.color.copy(originalMaterial.color);
+        }
+    }
+    
+    this.currentMesh = this.meshCache[partName];
+    
+    if (this.currentMesh) {
+        // Store the current color before changing to white
+        const currentColor = this.currentMesh.material.color.clone();
+        
+        // Flash white briefly
+        this.currentMesh.material.color.setHex(0xFFFFFF);
+        
+        // Restore the color after a short delay
+        setTimeout(() => {
+            if (this.currentMesh && this.currentMesh.name === partName) {
+                this.currentMesh.material.color.copy(currentColor);
+            }
+        }, 200); // 200ms flash duration
+        
+        this.updatePartDisplay(partName, index);
+        this.updateActiveColorFromMesh();
+    }
+  }
   createUI() {
     this.uiContainer = document.createElement('div');
     this.uiContainer.id = 'ui-panel';
