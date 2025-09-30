@@ -12,8 +12,8 @@ importers:
         specifier: ^0.7.7
         version: 0.7.9
       three:
-        specifier: ^0.133.0
-        version: 0.133.1
+        specifier: ^0.180.0
+        version: 0.180.0
     devDependencies:
       '@parcel/transformer-image':
         specifier: ^2.0.0-rc.0
@@ -919,8 +919,8 @@ packages:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
 
-  three@0.133.1:
-    resolution: {integrity: sha512-WydohO8ll949B0FTD6MGz59Yv2Lwj8hvObg/0Heh2r42S6+tQC1WByfCNRdmG4D7+odfGod+n8JPV1I2xrboWw==}
+  three@0.180.0:
+    resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==}
 
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
@@ -2055,7 +2055,7 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  three@0.133.1: {}
+  three@0.180.0: {}
 
   to-regex-range@5.0.1:
     dependencies:
