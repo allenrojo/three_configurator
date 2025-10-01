@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { UIController } from './ui-controller.js';
+import modelUrl from '/models/controller.glb?url';
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -63,7 +64,7 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
 // Load GLB model
 const assetLoader = new GLTFLoader();
 assetLoader.load(
-  '/models/controller.glb',
+  modelUrl,
   function (gltf) {
     console.log('✅ MODEL LOADED!', gltf);
     const parts = {};
