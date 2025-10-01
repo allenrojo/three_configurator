@@ -33,7 +33,7 @@ orbit.update();
 
 // Optional settings
 orbit.enableDamping = true;
-orbit.dampingFactor = 0.05;
+orbit.dampingFactor = 0.02;
 orbit.minDistance = 2;
 orbit.maxDistance = 10;
 
