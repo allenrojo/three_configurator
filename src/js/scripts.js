@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { UIController } from './ui-controller.js';
-
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -20,28 +19,22 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
 
 const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth/window.innerHeight,
-    0.1,
-    1000
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
 );
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 
-orbit.target.set(0, 1.5, 0);  // Slightly above the origin
+orbit.target.set(0, 1.5, 0); // Slightly above the origin
 orbit.update();
 
-// You can also add these optional settings for better control:
-orbit.enableDamping = true;      // Smooth camera movement
-orbit.dampingFactor = 0.05;      // Smoothness amount
-orbit.minDistance = 2;           // How close you can zoom
-orbit.maxDistance = 10;   
-
-const axesHelper = new THREE.AxesHelper(5);
-//scene.add(axesHelper);
-
-const gridHelper = new THREE.GridHelper(30, 30);
-//scene.add(gridHelper)
+// Optional settings
+orbit.enableDamping = true;
+orbit.dampingFactor = 0.05;
+orbit.minDistance = 2;
+orbit.maxDistance = 10;
 
 const meshMaterials = {};
 const meshCache = {};
@@ -53,49 +46,73 @@ const mouse = new THREE.Vector2();
 // store the UI controller
 let uiController;
 
+// ✅ glassMaterial defined BEFORE loader
+const glassMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0x4d4d4d,
+  metalness: 0,
+  roughness: 0,
+  transmission: 1,
+  thickness: 0.2,
+  transparent: true,
+  opacity: 1,
+  ior: 1,
+  clearcoat: 1,
+  clearcoatRoughness: 0,
+});
+
+// Load GLB model
 const assetLoader = new GLTFLoader();
-assetLoader.load('/models/controller.glb', function(gltf) {
+assetLoader.load(
+  '/models/controller.glb',
+  function (gltf) {
+    console.log('✅ MODEL LOADED!', gltf);
     const parts = {};
     const model = gltf.scene;
     scene.add(model);
-    model.position.set(0,1.5,0);
-    model.rotateX(.5);
-    
+    model.position.set(0, 1.5, 0);
+    model.rotateX(0.5);
+
     model.traverse((child) => {
-        if (child.isMesh) {
-            meshCache[child.name] = child;
-            
-            meshMaterials[child.name] = child.material.clone();
-            
-            child.castShadow = true;
-            child.receiveShadow = true;
-        
-        }
-        
-        if (child.isMesh) {
-            parts[child.name] = child;
-        }
-        
-        if(meshCache["button_outer"]) {
-            meshCache["button_outer"].material = glassMaterial;
-            meshCache["button_outer"].material.needsUpdate = true;
-        }
+      if (child.isMesh) {
+        meshCache[child.name] = child;
+        meshMaterials[child.name] = child.material.clone();
+
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        parts[child.name] = child;
+      }
     });
-    
-    console.log(parts);
+
+    // Apply glass material if button_outer exists
+    if (meshCache['button_outer']) {
+      meshCache['button_outer'].material = glassMaterial;
+      meshCache['button_outer'].material.needsUpdate = true;
+    }
+
+    console.log('Loaded parts:', parts);
     uiController = new UIController(meshCache, meshMaterials, scene);
-   
-}, undefined, function(error) {
-    console.error(error);
-});
+  },
+  undefined,
+  async function (error) {
+    console.error('GLTFLoader error:', error);
+    try {
+      const res = await fetch('/models/controller.glb');
+      const txt = await res.text();
+      console.warn('File response preview:', txt.slice(0, 200));
+    } catch (e) {
+      console.error('File fetch failed:', e);
+    }
+  }
+);
 
-// soft area light
-const softLight = new THREE.RectAreaLight(0xffffff, 5, 6, 6);
-softLight.position.set(5, 8, 5);
-softLight.lookAt(0, 1, 0);
-scene.add(softLight);
+// === Lighting ===
+// const softLight = new THREE.RectAreaLight(0xffffff, 5, 6, 6);
+// softLight.position.set(5, 8, 5);
+// softLight.lookAt(0, 1, 0);
+// scene.add(softLight);
 
-const mainLight = new THREE.DirectionalLight(0xffffff, 0);
+const mainLight = new THREE.DirectionalLight(0xffffff, 1);
 mainLight.position.set(0, 8, 5);
 mainLight.castShadow = true;
 mainLight.shadow.mapSize.width = 4096;
@@ -110,98 +127,73 @@ mainLight.shadow.radius = 10;
 mainLight.shadow.blurSamples = 25;
 scene.add(mainLight);
 
-const fillLight = new THREE.DirectionalLight(0xffffff, .4);
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
 fillLight.position.set(-5, 5, -5);
 scene.add(fillLight);
 
-const rimLight = new THREE.DirectionalLight(0xffffff, .5);
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
 rimLight.position.set(0, 8, -10);
 scene.add(rimLight);
 
-const underLight = new THREE.DirectionalLight(0xffffff, .2);
+const underLight = new THREE.DirectionalLight(0xffffff, 0.2);
 underLight.position.set(0, -5, 0);
 scene.add(underLight);
 
-const ambient = new THREE.AmbientLight(0xffffff, .6);
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambient);
 
-// real shadow
+// === Shadow Plane ===
 const shadowMat = new THREE.ShadowMaterial({ opacity: 0.3 });
-const shadowPlane = new THREE.Mesh(
-  new THREE.PlaneGeometry(200, 200),
-  shadowMat
-);
+const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), shadowMat);
 shadowPlane.rotation.x = -Math.PI / 2;
 shadowPlane.position.y = 0;
 shadowPlane.receiveShadow = true;
 scene.add(shadowPlane);
 
-const glassMaterial = new THREE.MeshPhysicalMaterial({
-  color: 0x4D4D4D,
-  metalness: 0,
-  roughness: 0,
-  transmission: 1,
-  thickness: 0.2,
-  transparent: true,
-  opacity: 1,
-  ior: 1,
-  clearcoat: 1,
-  clearcoatRoughness: 0,
-});
-
-camera.position.set(0,2,5);
+camera.position.set(0, 2, 5);
 orbit.update();
 
-// Mouse click event listener
+// === Mouse Events ===
 function onMouseClick(event) {
-    // Calculate mouse position in normalized device coordinates (-1 to +1)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    
-    // Update the raycaster with the camera and mouse position
-    raycaster.setFromCamera(mouse, camera);
-    
-    // Get all clickable meshes
-    const clickableMeshes = Object.values(meshCache);
-    
-    // Calculate objects intersecting the picking ray
-    const intersects = raycaster.intersectObjects(clickableMeshes, false);
-    
-    if (intersects.length > 0) {
-        const clickedMesh = intersects[0].object;
-        
-        // Tell the UI controller to select this part
-        if (uiController && clickedMesh.name) {
-            uiController.selectPartByName(clickedMesh.name);
-        }
-    }
-}
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-// Attach click listener to the renderer
+  raycaster.setFromCamera(mouse, camera);
+  const clickableMeshes = Object.values(meshCache);
+  const intersects = raycaster.intersectObjects(clickableMeshes, false);
+
+  if (intersects.length > 0) {
+    const clickedMesh = intersects[0].object;
+    if (uiController && clickedMesh.name) {
+      uiController.selectPartByName(clickedMesh.name);
+    }
+  }
+}
 renderer.domElement.addEventListener('click', onMouseClick, false);
 
-// Visual feedback on hover (optional but nice)
 function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    
-    raycaster.setFromCamera(mouse, camera);
-    const clickableMeshes = Object.values(meshCache);
-    const intersects = raycaster.intersectObjects(clickableMeshes, false);
-    
-    // Change cursor to pointer when hovering over a mesh
-    if (intersects.length > 0) {
-        document.body.style.cursor = 'pointer';
-    } else {
-        document.body.style.cursor = 'default';
-    }
-}
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+  raycaster.setFromCamera(mouse, camera);
+  const clickableMeshes = Object.values(meshCache);
+  const intersects = raycaster.intersectObjects(clickableMeshes, false);
+
+  document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+}
 renderer.domElement.addEventListener('mousemove', onMouseMove, false);
 
+// === Animation Loop ===
+let logged = false;
 function animate() {
   requestAnimationFrame(animate);
   orbit.update();
+  if (!logged) {
+    console.log('Scene children:', scene.children.length);
+    console.log('Camera position:', camera.position);
+    console.log('Camera looking at:', orbit.target);
+    logged = true;
+  }
   renderer.render(scene, camera);
 }
 animate();
