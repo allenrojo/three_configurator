@@ -56,7 +56,7 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
   thickness: 0.2,
   transparent: true,
   opacity: 1,
-  ior: 1,
+  ior: 1.05,
   clearcoat: 1,
   clearcoatRoughness: 0,
 });

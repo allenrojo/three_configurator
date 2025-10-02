@@ -27,7 +27,7 @@ export class UIController {
       'shoulder_buttons': 'Shoulder Buttons',
     };
     this.colors = [
-      { name: 'Black', hex: '#2c2c2cff' },
+      { name: 'Black', hex: '#2c2c2c' },
       { name: 'Khaki', hex: '#C0AF9C' },
       { name: 'Teal', hex: '#089DA4' },
       { name: 'Gray', hex: '#C3C2C7' },
@@ -197,25 +197,18 @@ export class UIController {
   updateActiveColorFromMesh() {
     if (!this.currentMesh) return;
 
-    const currentColor = '#' + this.currentMesh.material.color.getHexString();
+    const partName = this.currentMesh.name;
+    const storedColor = this.partColors[partName];
+    if (!storedColor) return;
+
     const swatches = document.querySelectorAll('.color-swatch');
-    
-    let closestSwatch = null;
-    let closestDistance = Infinity;
-
-    swatches.forEach(swatch => {
-      const swatchColor = swatch.dataset.color;
-      const distance = this.colorDistance(currentColor, swatchColor);
-      
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestSwatch = swatch;
+    for (let swatch of swatches) {
+      if (swatch.dataset.color.toLowerCase() === storedColor.toLowerCase()) {
+        this.setActiveColor(swatch);
+        break;
       }
-    });
-
-    if (closestSwatch) {
-      this.setActiveColor(closestSwatch);
     }
+
   }
 
   setActiveColor(swatch) {
