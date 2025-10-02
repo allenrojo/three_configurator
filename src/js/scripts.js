@@ -61,12 +61,16 @@ const glassMaterial = new THREE.MeshPhysicalMaterial({
   clearcoatRoughness: 0,
 });
 
+const loadingElement = document.getElementById('loading');
+loadingElement.style.display = 'block'; // Show spinner initially
+
 // Load GLB model
 const assetLoader = new GLTFLoader();
 assetLoader.load(
   modelUrl,
   function (gltf) {
     console.log('✅ MODEL LOADED!', gltf);
+    loadingElement.style.display = 'none';
     const parts = {};
     const model = gltf.scene;
     scene.add(model);
@@ -97,6 +101,7 @@ assetLoader.load(
   undefined,
   async function (error) {
     console.error('GLTFLoader error:', error);
+    loadingElement.style.display = 'hidden';
     try {
       const res = await fetch(modelUrl);
       const txt = await res.text();

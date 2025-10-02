@@ -27,13 +27,13 @@ export class UIController {
       'shoulder_buttons': 'Shoulder Buttons',
     };
     this.colors = [
-      { name: 'Black', hex: '#4e4e4e' },
-      { name: 'Gray', hex: '#C0AF9C' },
-      { name: 'White', hex: '#089DA4' },
-      { name: 'White', hex: '#C3C2C7' },
-      { name: 'White', hex: '#E86E61' },
-      { name: 'White', hex: '#A8416B' },
-      { name: 'White', hex: '#988FC6' }, 
+      { name: 'Black', hex: '#2c2c2cff' },
+      { name: 'Khaki', hex: '#C0AF9C' },
+      { name: 'Teal', hex: '#089DA4' },
+      { name: 'Gray', hex: '#C3C2C7' },
+      { name: 'Vermilion', hex: '#E86E61' },
+      { name: 'Raspberry', hex: '#A8416B' },
+      { name: 'Lavender', hex: '#988FC6' }, 
     ];
     this.init();
   }
