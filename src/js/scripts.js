@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { UIController } from './ui-controller.js';
-import modelUrl from '/models/controller-v1.glb?url';
+import modelUrl from '/models/controller.glb?url';
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -35,7 +35,7 @@ orbit.update();
 orbit.enableDamping = true;
 orbit.dampingFactor = 0.02;
 orbit.minDistance = 2;
-orbit.maxDistance = 10;
+orbit.maxDistance = 5;
 
 const meshMaterials = {};
 const meshCache = {};
@@ -49,7 +49,7 @@ let uiController;
 
 // ✅ glassMaterial defined BEFORE loader
 const glassMaterial = new THREE.MeshPhysicalMaterial({
-  color: 0x4d4d4d,
+  color: 0xFFFFFF,
   metalness: 0,
   roughness: 0,
   transmission: 1,
@@ -98,7 +98,7 @@ assetLoader.load(
   async function (error) {
     console.error('GLTFLoader error:', error);
     try {
-      const res = await fetch('/models/controller.glb');
+      const res = await fetch(modelUrl);
       const txt = await res.text();
       console.warn('File response preview:', txt.slice(0, 200));
     } catch (e) {

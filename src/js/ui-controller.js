@@ -4,17 +4,37 @@ export class UIController {
     this.meshMaterials = meshMaterials;
     this.scene = scene;
     this.uiContainer = null;
-    this.partNames = Object.keys(meshCache);
+    this.excludedParts = new Set(['decal_bottom', 'decal_rear']);
+    this.partNames = Object.keys(meshCache).filter(name => !this.excludedParts.has(name));
     this.currentPartIndex = 0;
     this.currentMesh = null;
-    
-    // Define color palette
+    this.partColors = {}; 
+    this.displayNameMap = {
+      'button_inner': 'Button Inner',
+      'button_outer': 'Button Outer Glass',
+      'button_text': 'Button Text',
+      'd-pad': 'D-Pad',
+      'decal_bottom': 'Bottom Decal',
+      'decal_rear': 'Rear Decal',
+      'joystick_grip': 'Joystick Grip',
+      'joystick_inner': 'Joystick Shaft',
+      'mode_buttons_1': 'Mode Button Color 1',
+      'mode_buttons_2': 'Mode Button Color 2',
+      'shell_bottom': 'Shell Bottom',
+      'shell_bottom_1': 'Screws',
+      'shell_bottom_2': 'Gulikit Logo',
+      'shell_bottom_3': 'Shell Top',
+      'shoulder_buttons': 'Shoulder Buttons',
+    };
     this.colors = [
-      { name: 'Black', hex: '#0E0E0E' },
-      { name: 'Gray', hex: '#808080' },
-      { name: 'White', hex: '#FFFFFF' },
+      { name: 'Black', hex: '#4e4e4e' },
+      { name: 'Gray', hex: '#C0AF9C' },
+      { name: 'White', hex: '#089DA4' },
+      { name: 'White', hex: '#C3C2C7' },
+      { name: 'White', hex: '#E86E61' },
+      { name: 'White', hex: '#A8416B' },
+      { name: 'White', hex: '#988FC6' }, 
     ];
-    
     this.init();
   }
 
@@ -39,35 +59,35 @@ export class UIController {
 
   selectPartByIndex(index) {
     const partName = this.partNames[index];
-    
-    // Remove highlight from previous mesh (restore original color)
-    if (this.currentMesh) {
-        const originalMaterial = this.meshMaterials[this.currentMesh.name];
-        if (originalMaterial) {
-            this.currentMesh.material.color.copy(originalMaterial.color);
-        }
-    }
-    
     this.currentMesh = this.meshCache[partName];
-    
+
     if (this.currentMesh) {
-        // Store the current color before changing to white
-        const currentColor = this.currentMesh.material.color.clone();
-        
-        // Flash white briefly
-        this.currentMesh.material.color.setHex(0xFFFFFF);
-        
-        // Restore the color after a short delay
-        setTimeout(() => {
-            if (this.currentMesh && this.currentMesh.name === partName) {
-                this.currentMesh.material.color.copy(currentColor);
-            }
-        }, 500); // 200ms flash duration
-        
-        this.updatePartDisplay(partName, index);
-        this.updateActiveColorFromMesh();
+      // Flash white briefly as highlight (optional)
+    const lastColor =
+      this.partColors[partName] || '#' + this.meshMaterials[partName].color.getHexString();
+
+      
+      // Flash white
+      this.currentMesh.material.color.setHex(0xFFFFFF);
+
+      setTimeout(() => {
+        // Restore last known color
+        if (this.currentMesh && this.currentMesh.name === partName) {
+          this.currentMesh.material.color.setStyle(lastColor);
+        }
+      }, 500);
+
+      // Optionally update the stored color map if it doesn't exist
+      if (!this.partColors) this.partColors = {};
+      if (!this.partColors[partName]) {
+        this.partColors[partName] = lastColor;
+      }
+
+      this.updatePartDisplay(partName, index);
+      this.updateActiveColorFromMesh();
     }
   }
+
   createUI() {
     this.uiContainer = document.createElement('div');
     this.uiContainer.id = 'ui-panel';
@@ -151,14 +171,16 @@ export class UIController {
 
 
   updatePartDisplay(partName, index) {
-    const displayName = partName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const displayName = this.displayNameMap[partName] || partName;
     document.getElementById('part-name').textContent = displayName;
     document.getElementById('part-counter').textContent = `${index + 1}/${this.partNames.length}`;
   }
 
+
   changeColor(hexColor) {
     if (!this.currentMesh) return;
     this.currentMesh.material.color.setStyle(hexColor);
+    this.partColors[this.currentMesh.name] = hexColor;
   }
 
   resetPart() {
